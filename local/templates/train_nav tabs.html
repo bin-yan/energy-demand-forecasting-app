@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+
+
+    <script src="https://code.highcharts.com/maps/modules/map.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/data.js"></script>
+
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <!--Has to be called style.css -->
+
+</head>
+
+<body>
+
+<div style="margin: 15px;" >
+
+    <!-- Nav tabs -->
+    <ul id="mytab" class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#scatterTab" role="tab">Scatter</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#calendarTab" role="tab">Calender</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#messages" role="tab">TBD</a>
+        </li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content" style="height: 600px">
+        <div class="tab-pane active" id="scatterTab" role="tabpanel">
+            <div class="row">
+                <div class="col-md-12">
+                    <h5>Scatter Plot</h5>
+                </div>
+                <div class = "col-md-6 col-md-offset-1">
+                    <div>
+                        <form>
+                            <select id="selectY" class="btn btn-secondary btn-sm">
+                                {% for key in keys %}
+                                    <option value="{{ key }}" name="{{ key }}">{{ key }}</option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </div>
+                    <div id="scatterChartContainer" style="height: 500px;"></div>
+                    <div align="right">
+                        <form>
+                            <select id="selectX" class="btn btn-secondary btn-sm">
+                                {% for key in keys %}
+                                    <option value="{{ key }}">{{ key }}</option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-md-4 col-md-offset-1">
+                    Here show some indicators, e.g. correlation factor<br>
+                    Consider visualize PCA
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane" id="calendarTab" role="tabpanel">
+            <div class="row">
+                <div class="col-md-12">
+                    <h5>Calendar view</h5>
+                    <div class="legendContainer" id="heatmapLegend"></div>
+                </div>
+                <div id="heatmapContainer" class="col-md-8"></div>
+                <div class="col-md-4">
+                    Some text here.
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane" id="messages" role="tabpanel">
+            TBD
+        </div>
+    </div>
+
+<hr>
+
+    <div class="row">
+        <form method=post enctype=multipart/form-data>
+            <div class="col-md-8">
+                <div id="timelineChartContainer" style="height: 370px;"></div>
+                <div>
+                    <span class="help-inline small text-muted"> Use the range selector above to select the training and test period. Click the button(s) to set the training and test period</span>
+                    <br>
+                    <button id="setTrainingPeriod" type="button" class="btn btn-default btn-xs" style="width:115px">Set Training Period</button>
+                    from
+                    <input name="trainStart" id="trainStart" placeholder="Not set yet" class="no-border text-center inputPeriod" readonly>
+                    to
+                    <input name="trainEnd" id="trainEnd" placeholder="Not set yet" class="no-border text-center inputPeriod" readonly>
+                    <br>
+                    <button id="setTestPeriod" type="button" class="btn btn-default btn-xs" style="width:115px">Set Test Period</button>
+                    from
+                    <input name="testStart" id="testStart" placeholder="Not set yet" class="no-border text-center  inputPeriod" readonly>
+                    to
+                    <input name="testEnd" id="testEnd" placeholder="Not set yet" class="no-border text-center  inputPeriod" readonly>
+
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <h5>Target</h5>
+                <select name="target" class="btn btn-sm">
+                    {% for key in keys %}
+                        <option value="{{ key }}">{{ key }}</option>
+                    {% endfor %}
+                </select>
+
+                <h5>Features</h5>
+                {% for key in keys %}
+                    <input type="checkbox" value="{{ key }}" name="features">{{ key }}<br>
+                {% endfor %}
+
+                <br>
+            </div>
+
+            <div class="col-md-10 text-center">
+                <input type="submit" class="btn btn-primary" value="Submit">
+            </div>
+
+        </form>
+    </div>
+
+</div>
+
+
+<script type="text/javascript">
+
+    $( document ).ready( function() {
+
+        $('#mytab a:first').tab('show');  // show the tab format when page loading
+
+        var normalColor = 'rgba(11, 98, 164, 0.7)', abnormalColor = 'rgba(255,15,0, 0.6)';
+        var timelineChart, scatterChart;
+
+        var col = {{ collection|tojson }};
+        var keys = {{ keys|tojson }};
+
+        $.ajax({
+            url: "/format/scatter/" + col,
+            data: {
+                excluded_fields: ['timestamp','date'],
+                x: keys[0],
+                y: keys[1]
+            }
+        }).done(function (results) {
+
+            var scatterData = results.formattedData;
+
+            console.log(scatterData)
+
+            document.getElementById("selectX").value = keys[0];
+            document.getElementById("selectY").value = keys[1];
+
+            scatterChart = Highcharts.chart('scatterChartContainer', {
+                chart: {
+                    type: 'scatter',
+                    zoomType: 'xy'
+                },
+
+                credits: {enabled: false},
+
+                title: {
+                    text: ''
+                },
+
+                tooltip: {
+                    headerFormat: '',
+                    valueDecimals: 2,
+                },
+
+                xAxis: {
+                    title: {
+                        enabled: false,
+                    },
+                    startOnTick: true,
+                    endOnTick: true,
+                    showLastLabel: true,
+                    gridLineWidth: 1,
+                },
+                yAxis: {
+                    title: {
+                        enabled: false,
+                    },
+                },
+
+                plotOptions: {
+                    scatter: {
+                        marker: {
+                            radius: 4,
+                            states: {
+                                hover: {
+                                    enabled: true,
+                                    lineColor: 'rgb(100,100,100)'
+                                }
+                            }
+                        },
+                        states: {
+                            hover: {
+                                marker: {
+                                    enabled: false
+                                }
+                            }
+                        },
+                    }
+                },
+                series: [{
+                    showInLegend: false,
+                    turboThreshold: 2000,
+                    data: scatterData,
+                    marker: {
+                        fillColor: normalColor,
+                        states: {
+                            select: {
+                                radius: 12,
+                                fillColor: this.color,
+                                lineColor: 'black',
+                                lineWidth: 3
+                            }
+                        },
+                    },
+                    point: {
+                        events: {
+                            select: function () {
+                            }
+                        }
+                    },
+                    tooltip: {
+                        pointFormat: 'x: <b>{point.x:,.2f}</b><br> y: <b>{point.y:,.2f}</b>'
+                    }
+                }]
+            });
+
+            document.getElementById("selectX").onchange = function () {
+                var xValue = document.getElementById("selectX").value;
+                var newData = [];   // can not copy, have to create a new var, otherwise will not update.
+
+                $.each(scatterData, function (i, d) {
+                    newData[i] = {
+                        x: d[xValue],
+                        y: d['y'],
+                        id: d['id'],
+                        marker: d['marker']
+                    };
+
+                    d['x'] = d[xValue];  //update scatterData for the preparation of selectY change
+                });
+
+                scatterChart.series[0].setData(newData);
+            };
+
+
+            document.getElementById("selectY").onchange = function () {
+                var yValue = document.getElementById("selectY").value;
+                var newData = [];   // can not copy, have to create a new var, otherwise will not update.
+
+                $.each(scatterData, function (i, d) {
+                    newData[i] = {
+                        y: d[yValue],
+                        x: d['x'],
+                        id: d['id'],
+                        marker: d['marker']
+                    };
+
+                    d['y'] = d[yValue];  //update scatterData for the preparation of selectY change
+                });
+
+                scatterChart.series[0].setData(newData);
+            };
+        });
+
+
+        $.ajax({
+            url: "/format/timeline/" + col,
+            data: {
+                x: 'timestamp',
+                measuredMean: 'chilledWater-TonDays',
+                id_: 'date',
+                normalColor: normalColor
+            }
+        }).done(function (results) {
+
+            console.log(results)
+
+            var measuredData = results.formattedData['measured'];
+
+            timelineChart = new Highcharts.stockChart('timelineChartContainer', {
+
+                plotOptions: {},
+
+                chart: {
+                    zoomType: 'x'
+                },
+
+                credits: {enabled: false},
+
+                legend: {
+                    enabled: false,
+                },
+
+                rangeSelector: {
+                    selected: 2
+                },
+
+                title: {
+                    text: ''
+                },
+
+                tooltip: {
+                    valueDecimals: 2,
+                },
+
+                series: [
+
+                    // only for legend
+                    {
+                        type: 'scatter',
+                        name: 'confidence range',
+                        data: {},
+                        lineWidth: 0,
+                        showInNavigator: false,
+                        showInLegend: true,
+                        color: '#6b9bc3',
+                        marker: {
+                            fillColor: Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0.5).get('rgba'),
+                            symbol: 'square',
+                            radius: 15
+                        }
+                    },
+
+
+                    {
+                        type: 'spline',
+                        turboThreshold: 3000,
+                        lineWidth: 1,
+                        name: 'predicted mean',
+                        data: measuredData,
+                        color: '#0b62a4',
+                        showInNavigator: false,
+                        showInLegend: false,
+                        marker: {    // somehow no markers, need to add addtional scatter series
+                        }
+                    },
+                    {
+                        type: 'scatter',
+                        turboThreshold: 3000,
+                        lineWidth: 0,
+                        name: 'measured',
+                        data: measuredData,
+                        color: '#0b62a4',
+                        showInNavigator: true,
+                        allowPointSelect: true,
+                        marker: {
+                            symbol: "circle",
+                            radius: 4,
+                            enable: false,
+                            states: {
+                                select: {
+                                    radius: 9,
+                                    fillColor: this.color,
+                                    lineColor: 'black',
+                                    lineWidth: 3
+                                }
+                            },
+                        },
+                        tooltip: {
+                            headerFormat: '',
+                            pointFormatter: function () {
+                                return '<span style="font-size: 10px">' + Highcharts.dateFormat("%A, %b, %e, %Y", this.x)
+                                    + '</span><br/>' + this.series.name + ': <b>' + this.y.toFixed(2) + '</b>';
+                            }
+                        }
+                    }
+                ]
+
+            });
+        });
+
+        $.ajax({
+            url: "/format/heatmap/" + col,
+            data: {
+                measuredMean: 'chilledWater-TonDays',
+                id_: 'date',
+            }
+        }).done(function (results) {
+
+            console.log(results)
+
+            chartOptions = {
+                credits: {enabled: false},
+                chart: {type: 'heatmap'},
+                exporting: {enabled: false},
+                legend: {enabled: false},
+                title: {text: ''},
+
+                subtitle: {
+                    text: 'month, year',
+                    align: 'left'
+                },
+
+                xAxis: {
+                    labels: {
+                        style: {
+                            fontSize: '6px'
+                        }
+                    },
+                    tickWidth: 0,
+                    lineWidth: 0,
+                    categories: ['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                },
+
+                yAxis: {
+                    title: {
+                        text: null
+                    },
+                    labels: {
+                        enabled: false
+                    },
+                    startOnTick: false,   // To control the space between title/subtitle and the chart content
+                    endOnTick: false,
+                    reversed: true,
+                    gridLineWidth: 0
+                },
+
+                colorAxis: {
+                    stops: [
+                        [0, '#3060cf'],
+                        [0.3, '#fffbbc'],
+                        [0.9, '#c4463a']
+                    ],
+                    min: 0,
+                    max: 200
+                },
+
+                series: [
+                    {
+                        data: null,
+                        tooltip: {
+                            headerFormat: '',
+                            pointFormatter: function () {
+                                var predicted = isNaN(this.predicted) | !this.predicted ? '' : 'predicted: ' + this.predicted.toFixed(2) + '<br>';
+                                return "measured: " + this.value.toFixed(2) + '<br>' + predicted;
+                            }
+                        },
+                        dataLabels: {
+                            enabled: true,
+                            format: '{point.name}',
+                            style: {
+                                "color": "white",
+                                "fontSize": "9px",
+                                "fontWeight": "normal",
+                                "textOutline": null
+                            }
+                        },
+                    }
+                ]
+            };
+
+            var month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+            var heatmapData = results.formattedData;
+            var yearRange = results.info.year;
+
+            for (var i = yearRange['min']; i <= yearRange['max']; i++) {
+                for (var j = 1; j <= 12; j++) {
+
+                    if(j<=6) k = 'a';
+                    else k = 'b';
+
+                    if (j%6 == 1) {
+                        $('<div class="row text-center">')     // text center does not work
+                            .appendTo('#heatmapContainer')
+                            .attr('id', 'year' + i + k);
+                    }
+
+                    chartOptions['series'][0]['data'] = heatmapData[i][j];
+                    if (heatmapData[i][j].length > 1)
+                        chartOptions['subtitle']['text'] = month[j - 1] + ',' + i;
+                    else
+                        chartOptions['subtitle']['text'] = '';
+                    $('<div class="heatmapChart col-md-2">')
+                        .appendTo('#year' + i + k)
+                        .highcharts(chartOptions);
+                }
+            }
+
+            Highcharts.chart('heatmapLegend', {
+
+                chart: {
+                    type: 'heatmap',
+                    spacingBottom: 0,
+                    spacingTop: 0,
+                    spacingLeft: 0,
+                    spacingRight: 0,
+                },
+
+                legend: {
+                    align: 'left',
+                    margin: 0,
+                    symbolWidth: 280,
+                    verticalAlign: 'top',
+                    floating: true
+                },
+
+                exporting: {enabled: false},
+
+                title: {text: ''},
+
+                subtitle: {text: ''},
+
+                xAxis: {
+                    tickWidth: 0,
+                    lineWidth: 0,
+                },
+
+                xAxis: {
+                    tickWidth: 0,
+                    lineWidth: 0,
+                },
+
+                yAxis: {
+                    title: {
+                        text: null
+                    },
+                    labels: {
+                        enabled: false
+                    },
+                    startOnTick: false,   // To control the space between title/subtitle and the chart content
+                    endOnTick: false,
+                    reversed: true,
+                    gridLineWidth: 0
+                },
+
+
+                colorAxis: {
+                    stops: [
+                        [0, '#3060cf'],
+                        [0.3, '#fffbbc'],
+                        [0.9, '#c4463a']
+                    ],
+                    min: 0,
+                    max: 200
+                },
+
+                series: [
+                    {
+                        data: null
+                    }
+                ]
+
+            });
+        });
+
+        document.getElementById("setTrainingPeriod").onclick = function(){
+            var extremes = timelineChart.xAxis[0].getExtremes();
+            document.getElementById("trainStart").value = new Date(extremes.min);
+            document.getElementById("trainEnd").value   = new Date(extremes.max);
+
+            document.getElementById("testStart").value = new Date(extremes.max);
+            document.getElementById("testEnd").value   = new Date(timelineChart.axes[1].max);
+
+        };
+
+        document.getElementById("setTestPeriod").onclick = function(){
+            var extremes = timelineChart.xAxis[0].getExtremes();
+            document.getElementById("testStart").value = extremes.min;
+            document.getElementById("testEnd").value   = extremes.max;
+        };
+
+    });
+
+
+</script>
+</body>
+</html>

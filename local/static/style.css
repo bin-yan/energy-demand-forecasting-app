@@ -1,0 +1,37 @@
+.heatmapChart {
+    height: 160px;
+    width: 160px;
+    margin: 0;
+    padding: 0
+}
+
+.legendContainer {
+    height: 50px
+}
+
+
+.no-border {
+    border: none;
+    box-shadow: none;
+}
+
+.inputPeriod {
+    width: 300px;
+    color: rgb(11, 98, 164);
+}
+
+#heatmapContainer, #container {
+
+    height: 500px;
+    overflow-y: scroll;
+}
+
+.modelResults {
+    color: #0b62a4;
+}
+
+/*works, but probably need to restart the debugger and hard refresh*/
+#featureRankContainer {
+    height: 335px;
+    overflow-y: scroll;
+}

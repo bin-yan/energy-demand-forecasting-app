@@ -1,0 +1,19 @@
+.heatmapChart {
+    height: 160px;
+    width: 160px;
+    margin: 0;
+    padding: 0
+}
+
+.legendContainer {
+    height: 50px
+}
+
+
+.no-border {
+    border: none;
+    box-shadow: none;
+}
+
+
+
