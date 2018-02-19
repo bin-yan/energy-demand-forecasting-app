@@ -19,7 +19,6 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
     <!-- Latest compiled and minified JavaScript -->
-    <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 
@@ -32,7 +31,7 @@
 
 <div style="margin: 15px;" >
 
-    <form method=post enctype=multipart/form-data>
+    <form method=post enctype=multipart/form-data onsubmit="return formCheck(this)">
         <div class="row">
             <div class="col-md-8">
                 <h5>Timeline Plot</h5>
@@ -584,7 +583,6 @@
                 }
             }
 
-            console.log(heatmapScale)
             heatmapLegend.update(
                 {
                     colorAxis: {
@@ -597,6 +595,34 @@
 
 
     });
+
+    function formCheck(form) {
+
+        var trainStart = form.trainStart.value;
+        var features = form.features;
+        var features_timeSeries = form.features_timeSeries;
+        var hasFeature = false
+
+        for (var i=0; i < features.length; i++) {
+            if(features[i].checked)
+                hasFeature = true
+        }
+
+        for (var i=0; i < features_timeSeries.length; i++) {
+            if(features_timeSeries[i].checked)
+                hasFeature = true
+        }
+
+        if (trainStart && hasFeature)
+            return true;
+        else
+            var messages = "";
+            if(!trainStart) messages = messages + "Training and test periods not specified. ";
+            if(!hasFeature) messages = messages + " No features selected.";
+            alert(messages)
+            return false;
+
+    }
 
 
 </script>

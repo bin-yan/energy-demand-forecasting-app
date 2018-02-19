@@ -1,0 +1,5 @@
+date,apparentTemperatureMax,apparentTemperatureMin,cloudCover,dewPoint,humidity,moonPhase,pressure,temperatureMax,temperatureMin,visibility,windBearing,windSpeed,electric
+1-Jan,37.66,17.27,0.16,11.57,0.44,0.37,1034.36,43.73,23.85,6.08,325,5.92,2900575
+20-Jan,48,test,0.05,16.82,0.53,0.4,1030.63,49.37,22.27,4.2,98,1.24,3158211
+20-Feb,57.42,31.73,0.08,25.78,0.52,0.44,1022.37,57.42,34.95,3.26,150,4.93,3596487
+20-Mar,64,32.22,0.01,31.21,0.6,0.47,1017.43,64,a,2.76,118,3.16,3939672

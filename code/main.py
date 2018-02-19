@@ -49,9 +49,17 @@ def upload_file():
         if request.form['collection']:
             collection = request.form['collection']
             if collection not in mongo.db.collection_names():
+                flash('Model does not exist.')
                 return redirect(request.url)
             else:
-                return redirect(url_for('visualize', collection=collection))
+                model = mongo.db['models'].find({'collection': collection}, {'_id': 0})[0]
+
+                if 'target' in model.keys():
+                    target = model['target']
+                    return redirect(url_for('visualize', collection=collection, target=target))
+                else:
+                    return redirect(url_for('train_and_predict', collection=collection))
+
         else:
             # check if the post request has the file part
             if 'file' not in request.files:
@@ -64,14 +72,30 @@ def upload_file():
                 flash('No selected file')
                 return redirect(request.url)
             if file:
-                # assign a random string as the name of the collection
-                collection = rand_str(6)
-                while collection in mongo.db.collection_names():
-                    collection = rand_str(6)
-
                 # import data to pandas and add some additional datetime features
                 df = pd.read_csv(file)
-                dt = df['date'].apply(lambda x: parser.parse(x))
+                if 'date' not in df.columns:
+                    flash('A date column with the name of "date" is required.')
+                    return redirect(request.url)
+
+                try:
+                    dt = df['date'].apply(lambda x: parser.parse(x))
+                except ValueError:
+                    flash('Date format of one or more data values is not acceptable.')
+                    return redirect(request.url)
+
+                isNumeric = df.applymap(np.isreal).all(0)
+                pass_numeric_test = True
+                for column in df.columns:
+                    if column != 'date':
+                        if not isNumeric[column]:
+                            pass_numeric_test = False
+                            flash('Column "' + column + '" contains non-numeric value(s). '
+                                                        'All values of features and target should be numeric.')
+
+                if not pass_numeric_test:
+                    return redirect(request.url)
+
                 df['timestamp'] = dt.apply(lambda x: x.timestamp() * 1000)
                 df['day_of_week'] = dt.apply(lambda x: x.isoweekday())   # 1 is Monday and 7 is Sunday
                 df['day_of_month'] = dt.apply(lambda x: x.day)
@@ -81,13 +105,13 @@ def upload_file():
                 df['month'] = dt.apply(lambda x: x.month)
 
                 data_json = json.loads(df.to_json(orient='records'))
+                # assign a random string as the name of the collection
+                collection = rand_str(6)
+                while collection in mongo.db.collection_names():
+                    collection = rand_str(6)
                 col = mongo.db[collection]
                 col.insert(data_json)
                 mongo.db['models'].insert({'collection': collection})
-
-                if "timestamp" in df.columns:
-                    print("found timestamp")
-                    col.create_index('timestamp')
 
                 return redirect(url_for('train_and_predict', collection=collection))
 
@@ -371,6 +395,7 @@ def gp_get_feature_rank(trained_model, features, X_train):
     x_train = X_train/trained_model['scale_x']
 
     parameters = trained_model['model'].get_parameter_dict()
+    print(parameters)
     lengthScale = parameters['model.kern.lengthscales']
     std = np.std(x_train, axis=0)
     importance = std / lengthScale
